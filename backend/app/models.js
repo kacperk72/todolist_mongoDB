@@ -9,6 +9,10 @@ const TaskSchema = new mongoose.Schema({
         type: String,
         required: true,
         minLength: [4, 'Minimalna długosc 4 znaki']
+    },
+    status: {
+        type: Boolean,
+        required: true
     }
 })
 
