@@ -6,6 +6,7 @@ import { TaskService } from './service/task.service';
 export interface TaskElement {
   id: string;
   title: string;
+  status: boolean;
 }
 
 @Component({
@@ -24,11 +25,13 @@ export class AppComponent implements OnInit {
   newTaskValue = '';
   newTask: TaskElement = {
     id: '',
-    title: ''
+    title: '',
+    status: false,
   };
   taskEdit: TaskElement = {
     id: '',
-    title: ''
+    title: '',
+    status: false
   };
   tasksArrayDB: any;
   tasksArray: any;
@@ -62,18 +65,26 @@ export class AppComponent implements OnInit {
   addTask(event: any): void{
     this.newTaskValue = event.target.task.value;
     this.newTask.title = this.newTaskValue;
-    this.taskService.addTask(this.newTask)
-    // this.listOfTasks.push(this.newTask);
-    event.target.task.value = " "; 
+    this.newTask.id = '';
+    this.newTask.status = false;
+    this.taskService.addTask(this.newTask).subscribe((res => {
+      // console.log(res);
+      this.listOfTasks.push(this.newTask);
+    }))
     this.isHiddenAddForm = true;
+    this.getTasks();
+    this.listOfTasks = [];
+    event.target.task.value = " ";
   }
 
   deleteTask(task: TaskElement, event: any): void {
     const index = this.listOfTasks.indexOf(task);
     this.listOfDoneTasks.splice(index,1);
+    this.taskService.deleteTask(task.id).subscribe(res => {
+      // console.log(res);
+    });
     this.listOfTasks = this.listOfTasks.filter(el => el.id !== task.id);
     this.checkProgress();
-
   }
 
   editTask(task: TaskElement): void {
@@ -85,7 +96,15 @@ export class AppComponent implements OnInit {
 
   saveEditedTask(event: any):void {
     const index = this.listOfTasks.indexOf(this.taskEdit);
-    this.listOfTasks[index].title = event.target.task.value;
+    console.log(this.taskEdit);
+    console.log(this.listOfTasks);
+    
+    
+    const newTitle = event.target.task.value;
+    this.listOfTasks[index].title = newTitle;
+    this.taskService.taskEdit(this.taskEdit, newTitle).subscribe(res => {
+      // console.log(res);
+    });
     this.isHiddenEditForm = true;
   }
 
@@ -97,6 +116,9 @@ export class AppComponent implements OnInit {
       if(event.checked === false){
         this.listOfDoneTasks[index] = false;
       }
+      this.taskService.taskCheck(task, event.checked).subscribe(res => {
+        // console.log(res);
+      });
       this.checkProgress();
     }
 

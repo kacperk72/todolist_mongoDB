@@ -5,7 +5,7 @@
         <mat-list-item *ngFor="let task of listOfTasks"> 
             {{task.title}}  
             <div id="options">
-              <mat-checkbox class="example-margin" checkbox style="margin-left:10px; margin-right: 10px;" (change)="checkboxChange($event, task)" id={{task.id}}></mat-checkbox>
+              <mat-checkbox class="example-margin" checkbox style="margin-left:10px; margin-right: 10px;" (change)="checkboxChange($event, task)" id={{task.id}} [checked]="task.status"></mat-checkbox>
               <button matSuffix mat-icon-button aria-label="Clear" id={{task.id}} (click)="deleteTask(task, $event)">
                 <mat-icon id={{task.id}}>delete</mat-icon>
               </button>
@@ -31,7 +31,7 @@
         <mat-form-field class="form-field" appearance="fill">
           <mat-label>Dodaj zadnie</mat-label>
           <input matInput name="task">
-          <button matSuffix mat-icon-button aria-label="Clear">
+          <button matSuffix mat-icon-button aria-label="Clear" type="submit">
             <mat-icon>add</mat-icon>
           </button>
         </mat-form-field>

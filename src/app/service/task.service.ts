@@ -6,6 +6,7 @@ import {v4 as uuid} from "uuid";
 export interface TaskElement {
   id: string;
   title: string;
+  status: boolean;
 }
 
 @Injectable({
@@ -23,11 +24,30 @@ export class TaskService {
     if(newTask.id === ''){
       newTask.id = uuid();
     }
-    console.log(newTask);
-    
     return this.httpClient.post("http://localhost:3000/addTask", {
       id: newTask.id,
-      title: newTask.title
+      title: newTask.title,
+      status: newTask.status
     });
   }
+
+  deleteTask(taskId: string) {
+    return this.httpClient.delete(`http://localhost:3000/deleteTask/${taskId}`)
+  }
+
+  taskCheck(task: TaskElement, status: boolean) {
+    return this.httpClient.patch(`http://localhost:3000/editTaskCheckbox/`, {
+        id: task.id,
+        status: status
+    })
+  }
+
+  taskEdit(task: TaskElement, title: string ) {
+    return this.httpClient.patch('http://localhost:3000/editTask', {
+      id: task.id,
+      title: title
+    }
+    )
+  }
+
 }
