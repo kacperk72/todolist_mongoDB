@@ -16,8 +16,8 @@ export class TaskService {
 
   constructor(private httpClient: HttpClient) { }
 
-  getTasks(): Observable<Object>{
-    return this.httpClient.get("http://localhost:3000/tasks");
+  getTasks(): Observable<TaskElement[]>{
+    return this.httpClient.get<TaskElement[]>("http://localhost:3000/tasks");
   }
 
   addTask(newTask: TaskElement) {
