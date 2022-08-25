@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, delay } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import {v4 as uuid} from "uuid";
 
 export interface TaskElement {
   id: string;
@@ -17,13 +16,12 @@ export class TaskService {
   constructor(private httpClient: HttpClient) { }
 
   getTasks(): Observable<TaskElement[]>{
+    // return this.httpClient.get<TaskElement[]>("http://localhost:3000/tasks").pipe(delay(1000));
     return this.httpClient.get<TaskElement[]>("http://localhost:3000/tasks");
+
   }
 
   addTask(newTask: TaskElement) {
-    if(newTask.id === ''){
-      newTask.id = uuid();
-    }
     return this.httpClient.post("http://localhost:3000/addTask", {
       id: newTask.id,
       title: newTask.title,
@@ -31,7 +29,9 @@ export class TaskService {
     });
   }
 
-  deleteTask(taskId: string) {
+  //TODO: Błąd z usuwaniem, po kliknięciu pokazuje 1 el wiecej ale usuwa
+  deleteTask(task: TaskElement) {
+    const taskId = task.id;
     return this.httpClient.delete(`http://localhost:3000/deleteTask/${taskId}`)
   }
 

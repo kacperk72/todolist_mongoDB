@@ -5,6 +5,9 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { select, Store } from '@ngrx/store';
 import { errorSelector, isLoadingSelector, taskSelector } from '../store/selectors';
 import { AppStateInterface } from '../types/appState.interface';
+import * as TasksActions from '../store/actions';
+import { TaskInterface } from '../types/task.interface';
+import {v4 as uuid} from "uuid";
 
 @Component({
   selector: 'app-tasks',
@@ -20,11 +23,6 @@ export class TasksComponent implements OnInit {
   listOfDoneTasks: boolean[] = [];
   progress = 0;
   newTaskValue = '';
-  newTask: TaskElement = {
-    id: '',
-    title: '',
-    status: false,
-  };
   taskEdit: TaskElement = {
     id: '',
     title: '',
@@ -33,99 +31,94 @@ export class TasksComponent implements OnInit {
   tasksArrayDB: any;
   tasksArray: any;
 
-  isLoading$: Observable<boolean>;
-  error$: Observable<string | null>;
-  tasks$: Observable<TaskElement[]>
+  isLoading$!: Observable<boolean>;
+  error$!: Observable<string | null>;
+  tasks$!: Observable<TaskInterface[]>
 
-  private subGetTasks$!: Subscription;
+  constructor(private taskService: TaskService, private store: Store<AppStateInterface>) { }
 
-  constructor(private taskService: TaskService, private store: Store<AppStateInterface>) {
+  ngOnInit() {
     this.isLoading$ = this.store.pipe(select(isLoadingSelector))
     this.error$ = this.store.pipe(select(errorSelector))
     this.tasks$ = this.store.pipe(select(taskSelector))
+
+    this.store.dispatch(TasksActions.getTasks());
   }
 
-  ngOnInit() {
-    // this.store.dispatch(TasksActions.getTasks());
-    this.getTasks();
-    for(let i=0; i<this.listOfTasks.length; i++){
-      this.listOfDoneTasks[i] = false;
-    }
-  }
+  // getTasks(){
+  //    this.taskService.getTasks().subscribe((tasksDB: TaskElement[]) => {
+  //     // console.log(tasksDB);
+  //     this.tasksArray = tasksDB
 
-  getTasks(){
-    this.subGetTasks$ = this.taskService.getTasks().subscribe((tasksDB: Object) => {
-      this.tasksArrayDB = tasksDB;
-      this.tasksArray = this.tasksArrayDB.trips;
-
-      this.tasksArray.forEach((el: TaskElement) => {
-        this.listOfTasks.push(el);
-      })
-    })
-  }
+  //     this.tasksArray.forEach((el: TaskElement) => {
+  //       this.listOfTasks.push(el);
+  //     })
+  //   })
+  // }
 
   setVisibleForm() {
     this.isHiddenAddForm = !this.isHiddenAddForm
   }
 
-  addTask(event: any): void{
-    this.newTaskValue = event.target.task.value;
-    this.newTask.title = this.newTaskValue;
-    this.newTask.id = '';
-    this.newTask.status = false;
-    this.taskService.addTask(this.newTask).subscribe((res => {
-      // console.log(res);
-      this.listOfTasks.push(this.newTask);
-    }))
-    this.isHiddenAddForm = true;
-    this.getTasks();
-    this.listOfTasks = [];
-    event.target.task.value = " ";
-  }
+  // addTask(event: any): void{
+  //   this.newTaskValue = event.target.task.value;
+  //   const newTask: TaskElement = {title: this.newTaskValue, id: "", status: false}
+  //   this.taskService.addTask(newTask).subscribe((res => {
+  //     // console.log(res);
+  //     this.listOfTasks.push(newTask);
+  //   }))
+  //   this.isHiddenAddForm = true;
+  //   this.getTasks();
+  //   this.listOfTasks = [];
+  //   event.target.task.value = " ";
+  // }
 
-  deleteTask(task: TaskElement, event: any): void {
-    const index = this.listOfTasks.indexOf(task);
-    this.listOfDoneTasks.splice(index,1);
-    this.taskService.deleteTask(task.id).subscribe(res => {
-      // console.log(res);
-    });
-    this.listOfTasks = this.listOfTasks.filter(el => el.id !== task.id);
-    this.checkProgress();
-  }
+    addTask(event: any){
+      this.newTaskValue = event.target.task.value;
+      const task: TaskInterface = {title: this.newTaskValue, id: uuid(), status: false}
+      this.store.dispatch(TasksActions.addTask({task}));
+      this.isHiddenAddForm = true;
+      event.target.task.value = " ";
 
-  editTask(task: TaskElement): void {
-    this.taskEdit = task;
-    if(this.isHiddenEditForm == true){
-      this.isHiddenEditForm=false;
     }
-  }
 
-  saveEditedTask(event: any):void {
-    const index = this.listOfTasks.indexOf(this.taskEdit);
-    console.log(this.taskEdit);
-    console.log(this.listOfTasks);
-    
-    
-    const newTitle = event.target.task.value;
-    this.listOfTasks[index].title = newTitle;
-    this.taskService.taskEdit(this.taskEdit, newTitle).subscribe(res => {
-      // console.log(res);
-    });
-    this.isHiddenEditForm = true;
-  }
+    deleteTask(task: TaskElement, event: any): void {
+      this.store.dispatch(TasksActions.deleteTask({task}));
+      
+      
+      // const index = this.listOfTasks.indexOf(task);
+      // this.listOfDoneTasks.splice(index,1);
+      // this.taskService.deleteTask(task.id).subscribe(res => {
+      //   // console.log(res);
+      // });
+      // this.listOfTasks = this.listOfTasks.filter(el => el.id !== task.id);
+      // this.checkProgress();
+    }
 
-  checkboxChange(event: MatCheckboxChange, task: TaskElement): void {
-    const index = this.listOfTasks.indexOf(task);
-      if(event.checked === true){
-          this.listOfDoneTasks[index] = true;
+    editTask(task: TaskElement): void {
+      this.taskEdit = task;
+      if(!!this.isHiddenEditForm){
+        this.isHiddenEditForm=false;
       }
-      if(event.checked === false){
-        this.listOfDoneTasks[index] = false;
-      }
-      this.taskService.taskCheck(task, event.checked).subscribe(res => {
+    }
+
+    saveEditedTask(event: any):void {
+      const index = this.listOfTasks.indexOf(this.taskEdit);
+      const newTitle = event.target.task.value;
+      this.listOfTasks[index].title = newTitle;
+      this.taskService.taskEdit(this.taskEdit, newTitle).subscribe(res => {
         // console.log(res);
       });
-      this.checkProgress();
+      this.isHiddenEditForm = true;
+    }
+
+    checkboxChange(event: MatCheckboxChange, task: TaskElement): void {
+      const index = this.listOfTasks.indexOf(task);
+      this.listOfDoneTasks[index] = event.checked;
+        this.taskService.taskCheck(task, event.checked).subscribe(res => {
+          // console.log(res);
+        });
+        this.checkProgress();
     }
 
     checkProgress() {

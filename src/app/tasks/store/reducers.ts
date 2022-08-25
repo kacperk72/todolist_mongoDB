@@ -1,3 +1,4 @@
+import { state } from "@angular/animations";
 import { createReducer, on } from "@ngrx/store";
 import { TaskStateInterface } from "../types/taskState.interface";
 import * as TaskActions from './actions'
@@ -19,5 +20,13 @@ export const reducers = createReducer(initialState,
         ...state,
         isLoading: false,
         erorr: action.error
+    })),
+    on(TaskActions.addTask, (state, action) => ({
+        ...state,
+        tasks: [...state.tasks, action.task]
+    })),
+    on(TaskActions.deleteTask, (state, action) => ({
+        ...state,
+        tasks: [...state.tasks, action.task]
     }))
     );

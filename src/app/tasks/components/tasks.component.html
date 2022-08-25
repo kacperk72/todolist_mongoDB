@@ -1,8 +1,14 @@
 <div id="box">
     <div id="container">
       <h1>ToDo List</h1>    
+      
+    <div *ngIf="isLoading$ | async">Loading...</div>
+
+    <div *ngIf="error$ | async as error">Loading...</div>
+
       <mat-selection-list #tasks>
-          <mat-list-item *ngFor="let task of listOfTasks"> 
+          <mat-list-item *ngFor="let task of tasks$ | async"> 
+          <!-- <mat-list-item *ngFor="let task of listOfTasks">  -->
               {{task.title}}  
               <div id="options">
                 <mat-checkbox class="example-margin" checkbox style="margin-left:10px; margin-right: 10px;" (change)="checkboxChange($event, task)" id={{task.id}} [checked]="task.status"></mat-checkbox>

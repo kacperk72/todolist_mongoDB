@@ -9,7 +9,7 @@ app.get("/tasks", async (req, res) => {
         res.status(500).json({ err: err })
         return
     }
-    res.status(200).json({ trips: items })
+    res.status(200).json(items)
   })
 });
 
