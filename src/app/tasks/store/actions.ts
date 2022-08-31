@@ -10,7 +10,6 @@ export const getTasksFailure = createAction(
     '[Tasks] Get Tasks failure',
     props<{error: string}>()
 );
-
 export const addTask = createAction(
     '[Tasks] Add Task',
     props<{ task: TaskInterface }>()     
@@ -24,6 +23,14 @@ export const deleteTask = createAction(
     props<{ task: TaskInterface }>()     
 );
 export const deleteTaskSuccess = createAction(
-    '[Tasks] Add Task Success',
+    '[Tasks] Delete Task Success',
+    props<{ task: TaskInterface }>()
+);
+export const editTask = createAction(
+    '[Tasks] Edit Task',
+    props<{ task: TaskInterface }>()     
+);
+export const editTaskSuccess = createAction(
+    '[Tasks] Edit Task Success',
     props<{ task: TaskInterface }>()
 );

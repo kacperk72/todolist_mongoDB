@@ -34,6 +34,13 @@ export class TaskEffects {
             return this.taskService.deleteTask(action.task)
         })
     ), {dispatch: false})
+
+    editTask$ = createEffect(() => this.actions$.pipe(
+        ofType(TaskActions.editTask),
+        mergeMap(action => {
+            return this.taskService.taskEdit(action.task)
+        })
+    ), {dispatch: false})
     
     constructor(private actions$: Actions, private taskService: TaskService) {}
 }

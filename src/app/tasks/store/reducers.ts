@@ -27,6 +27,10 @@ export const reducers = createReducer(initialState,
     })),
     on(TaskActions.deleteTask, (state, action) => ({
         ...state,
-        tasks: [...state.tasks, action.task]
+        tasks: [...state.tasks.filter(task => task.id !== action.task.id)]
+    })),
+    on(TaskActions.editTask, (state, action) => ({
+        ...state,
+        tasks: [...state.tasks.filter(task => task.id !== action.task.id), action.task]
     }))
     );

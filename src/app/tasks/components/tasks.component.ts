@@ -60,20 +60,7 @@ export class TasksComponent implements OnInit {
     this.isHiddenAddForm = !this.isHiddenAddForm
   }
 
-  // addTask(event: any): void{
-  //   this.newTaskValue = event.target.task.value;
-  //   const newTask: TaskElement = {title: this.newTaskValue, id: "", status: false}
-  //   this.taskService.addTask(newTask).subscribe((res => {
-  //     // console.log(res);
-  //     this.listOfTasks.push(newTask);
-  //   }))
-  //   this.isHiddenAddForm = true;
-  //   this.getTasks();
-  //   this.listOfTasks = [];
-  //   event.target.task.value = " ";
-  // }
-
-    addTask(event: any){
+  addTask(event: any){
       this.newTaskValue = event.target.task.value;
       const task: TaskInterface = {title: this.newTaskValue, id: uuid(), status: false}
       this.store.dispatch(TasksActions.addTask({task}));
@@ -82,17 +69,8 @@ export class TasksComponent implements OnInit {
 
     }
 
-    deleteTask(task: TaskElement, event: any): void {
+    deleteTask(task: TaskElement, event: Event): void {
       this.store.dispatch(TasksActions.deleteTask({task}));
-      
-      
-      // const index = this.listOfTasks.indexOf(task);
-      // this.listOfDoneTasks.splice(index,1);
-      // this.taskService.deleteTask(task.id).subscribe(res => {
-      //   // console.log(res);
-      // });
-      // this.listOfTasks = this.listOfTasks.filter(el => el.id !== task.id);
-      // this.checkProgress();
     }
 
     editTask(task: TaskElement): void {
@@ -103,12 +81,12 @@ export class TasksComponent implements OnInit {
     }
 
     saveEditedTask(event: any):void {
-      const index = this.listOfTasks.indexOf(this.taskEdit);
-      const newTitle = event.target.task.value;
-      this.listOfTasks[index].title = newTitle;
-      this.taskService.taskEdit(this.taskEdit, newTitle).subscribe(res => {
-        // console.log(res);
-      });
+      const task: TaskElement ={
+        id: this.taskEdit.id,
+        title: event.target.task.value,
+        status: this.taskEdit.status
+      }
+      this.store.dispatch(TasksActions.editTask({task}));
       this.isHiddenEditForm = true;
     }
 

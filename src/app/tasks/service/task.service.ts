@@ -29,7 +29,6 @@ export class TaskService {
     });
   }
 
-  //TODO: Błąd z usuwaniem, po kliknięciu pokazuje 1 el wiecej ale usuwa
   deleteTask(task: TaskElement) {
     const taskId = task.id;
     return this.httpClient.delete(`http://localhost:3000/deleteTask/${taskId}`)
@@ -42,10 +41,10 @@ export class TaskService {
     })
   }
 
-  taskEdit(task: TaskElement, title: string ) {
+  taskEdit(task: TaskElement) {
     return this.httpClient.patch('http://localhost:3000/editTask', {
       id: task.id,
-      title: title
+      title: task.title
     }
     )
   }
