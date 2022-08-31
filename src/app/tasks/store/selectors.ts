@@ -17,3 +17,13 @@ export const errorSelector = createSelector(
     selectFeature,
     (state) => state.error
 );
+
+export const progressSelector = createSelector(
+    selectFeature,
+    (state) => state.progress
+);
+
+export const amountOfTasksSelector = createSelector(
+    selectFeature,
+    (state) => state.amountOfTasks
+);

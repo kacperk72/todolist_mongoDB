@@ -8,6 +8,11 @@ export interface TaskElement {
   status: boolean;
 }
 
+export interface ProgressElement {
+  progress: number;
+  amountOfTasks: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,7 +23,10 @@ export class TaskService {
   getTasks(): Observable<TaskElement[]>{
     // return this.httpClient.get<TaskElement[]>("http://localhost:3000/tasks").pipe(delay(1000));
     return this.httpClient.get<TaskElement[]>("http://localhost:3000/tasks");
+  }
 
+  getProgress(): Observable<ProgressElement> {
+    return this.httpClient.get<ProgressElement>("http://localhost:3000/progress")
   }
 
   addTask(newTask: TaskElement) {

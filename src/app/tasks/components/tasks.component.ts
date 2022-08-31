@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskElement, TaskService } from '../service/task.service';
-import { Observable, Subscription } from 'rxjs';
+import { map, Observable, Subscription } from 'rxjs';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { select, Store } from '@ngrx/store';
-import { errorSelector, isLoadingSelector, taskSelector } from '../store/selectors';
+import { amountOfTasksSelector, errorSelector, isLoadingSelector, progressSelector, taskSelector } from '../store/selectors';
 import { AppStateInterface } from '../types/appState.interface';
 import * as TasksActions from '../store/actions';
 import { TaskInterface } from '../types/task.interface';
@@ -19,9 +19,6 @@ export class TasksComponent implements OnInit {
   title = 'to-do-list-app';
   isHiddenAddForm = true;
   isHiddenEditForm = true;
-  listOfTasks: TaskElement[] = [];
-  listOfDoneTasks: boolean[] = [];
-  progress = 0;
   newTaskValue = '';
   taskEdit: TaskElement = {
     id: '',
@@ -34,6 +31,8 @@ export class TasksComponent implements OnInit {
   isLoading$!: Observable<boolean>;
   error$!: Observable<string | null>;
   tasks$!: Observable<TaskInterface[]>
+  progress$!: Observable<number>;
+  amountOfTasks$!: Observable<number>;
 
   constructor(private taskService: TaskService, private store: Store<AppStateInterface>) { }
 
@@ -41,20 +40,12 @@ export class TasksComponent implements OnInit {
     this.isLoading$ = this.store.pipe(select(isLoadingSelector))
     this.error$ = this.store.pipe(select(errorSelector))
     this.tasks$ = this.store.pipe(select(taskSelector))
+    this.progress$ = this.store.pipe(select(progressSelector))
+    this.amountOfTasks$ = this.store.pipe(select(amountOfTasksSelector))
 
     this.store.dispatch(TasksActions.getTasks());
+    this.store.dispatch(TasksActions.getProgress());
   }
-
-  // getTasks(){
-  //    this.taskService.getTasks().subscribe((tasksDB: TaskElement[]) => {
-  //     // console.log(tasksDB);
-  //     this.tasksArray = tasksDB
-
-  //     this.tasksArray.forEach((el: TaskElement) => {
-  //       this.listOfTasks.push(el);
-  //     })
-  //   })
-  // }
 
   setVisibleForm() {
     this.isHiddenAddForm = !this.isHiddenAddForm
@@ -66,11 +57,14 @@ export class TasksComponent implements OnInit {
       this.store.dispatch(TasksActions.addTask({task}));
       this.isHiddenAddForm = true;
       event.target.task.value = " ";
+      this.store.dispatch(TasksActions.getProgress());
 
     }
 
-    deleteTask(task: TaskElement, event: Event): void {
+    deleteTask(task: TaskElement) {
       this.store.dispatch(TasksActions.deleteTask({task}));
+      this.store.dispatch(TasksActions.getProgress());
+
     }
 
     editTask(task: TaskElement): void {
@@ -91,22 +85,14 @@ export class TasksComponent implements OnInit {
     }
 
     checkboxChange(event: MatCheckboxChange, task: TaskElement): void {
-      const index = this.listOfTasks.indexOf(task);
-      this.listOfDoneTasks[index] = event.checked;
         this.taskService.taskCheck(task, event.checked).subscribe(res => {
           // console.log(res);
         });
-        this.checkProgress();
+        this.store.dispatch(TasksActions.getProgress());
+
     }
 
-    checkProgress() {
-      this.progress = 0;
-      this.listOfDoneTasks.forEach(el => {
-        if(el === true){
-          this.progress++;
-        }
-      })
-    }
+    
 
 }
 
