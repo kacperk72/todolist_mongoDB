@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskElement, TaskService } from '../service/task.service';
-import { Observable, Subscription } from 'rxjs';
+import { map, Observable, Subscription } from 'rxjs';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { select, Store } from '@ngrx/store';
-import { errorSelector, isLoadingSelector, taskSelector } from '../store/selectors';
+import { amountOfTasksSelector, errorSelector, isLoadingSelector, progressSelector, taskSelector } from '../store/selectors';
 import { AppStateInterface } from '../types/appState.interface';
 import * as TasksActions from '../store/actions';
 import { TaskInterface } from '../types/task.interface';
@@ -19,9 +19,6 @@ export class TasksComponent implements OnInit {
   title = 'to-do-list-app';
   isHiddenAddForm = true;
   isHiddenEditForm = true;
-  listOfTasks: TaskElement[] = [];
-  listOfDoneTasks: boolean[] = [];
-  progress = 0;
   newTaskValue = '';
   taskEdit: TaskElement = {
     id: '',
@@ -34,6 +31,8 @@ export class TasksComponent implements OnInit {
   isLoading$!: Observable<boolean>;
   error$!: Observable<string | null>;
   tasks$!: Observable<TaskInterface[]>
+  progress$!: Observable<number>;
+  amountOfTasks$!: Observable<number>;
 
   constructor(private taskService: TaskService, private store: Store<AppStateInterface>) { }
 
@@ -41,58 +40,31 @@ export class TasksComponent implements OnInit {
     this.isLoading$ = this.store.pipe(select(isLoadingSelector))
     this.error$ = this.store.pipe(select(errorSelector))
     this.tasks$ = this.store.pipe(select(taskSelector))
+    this.progress$ = this.store.pipe(select(progressSelector))
+    this.amountOfTasks$ = this.store.pipe(select(amountOfTasksSelector))
 
     this.store.dispatch(TasksActions.getTasks());
+    this.store.dispatch(TasksActions.getProgress());
   }
-
-  // getTasks(){
-  //    this.taskService.getTasks().subscribe((tasksDB: TaskElement[]) => {
-  //     // console.log(tasksDB);
-  //     this.tasksArray = tasksDB
-
-  //     this.tasksArray.forEach((el: TaskElement) => {
-  //       this.listOfTasks.push(el);
-  //     })
-  //   })
-  // }
 
   setVisibleForm() {
     this.isHiddenAddForm = !this.isHiddenAddForm
   }
 
-  // addTask(event: any): void{
-  //   this.newTaskValue = event.target.task.value;
-  //   const newTask: TaskElement = {title: this.newTaskValue, id: "", status: false}
-  //   this.taskService.addTask(newTask).subscribe((res => {
-  //     // console.log(res);
-  //     this.listOfTasks.push(newTask);
-  //   }))
-  //   this.isHiddenAddForm = true;
-  //   this.getTasks();
-  //   this.listOfTasks = [];
-  //   event.target.task.value = " ";
-  // }
-
-    addTask(event: any){
+  addTask(event: any){
       this.newTaskValue = event.target.task.value;
       const task: TaskInterface = {title: this.newTaskValue, id: uuid(), status: false}
       this.store.dispatch(TasksActions.addTask({task}));
       this.isHiddenAddForm = true;
       event.target.task.value = " ";
+      this.store.dispatch(TasksActions.getProgress());
 
     }
 
-    deleteTask(task: TaskElement, event: any): void {
+    deleteTask(task: TaskElement) {
       this.store.dispatch(TasksActions.deleteTask({task}));
-      
-      
-      // const index = this.listOfTasks.indexOf(task);
-      // this.listOfDoneTasks.splice(index,1);
-      // this.taskService.deleteTask(task.id).subscribe(res => {
-      //   // console.log(res);
-      // });
-      // this.listOfTasks = this.listOfTasks.filter(el => el.id !== task.id);
-      // this.checkProgress();
+      this.store.dispatch(TasksActions.getProgress());
+
     }
 
     editTask(task: TaskElement): void {
@@ -103,32 +75,24 @@ export class TasksComponent implements OnInit {
     }
 
     saveEditedTask(event: any):void {
-      const index = this.listOfTasks.indexOf(this.taskEdit);
-      const newTitle = event.target.task.value;
-      this.listOfTasks[index].title = newTitle;
-      this.taskService.taskEdit(this.taskEdit, newTitle).subscribe(res => {
-        // console.log(res);
-      });
+      const task: TaskElement ={
+        id: this.taskEdit.id,
+        title: event.target.task.value,
+        status: this.taskEdit.status
+      }
+      this.store.dispatch(TasksActions.editTask({task}));
       this.isHiddenEditForm = true;
     }
 
     checkboxChange(event: MatCheckboxChange, task: TaskElement): void {
-      const index = this.listOfTasks.indexOf(task);
-      this.listOfDoneTasks[index] = event.checked;
         this.taskService.taskCheck(task, event.checked).subscribe(res => {
           // console.log(res);
         });
-        this.checkProgress();
+        this.store.dispatch(TasksActions.getProgress());
+
     }
 
-    checkProgress() {
-      this.progress = 0;
-      this.listOfDoneTasks.forEach(el => {
-        if(el === true){
-          this.progress++;
-        }
-      })
-    }
+    
 
 }
 

@@ -8,6 +8,11 @@ export interface TaskElement {
   status: boolean;
 }
 
+export interface ProgressElement {
+  progress: number;
+  amountOfTasks: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -18,7 +23,10 @@ export class TaskService {
   getTasks(): Observable<TaskElement[]>{
     // return this.httpClient.get<TaskElement[]>("http://localhost:3000/tasks").pipe(delay(1000));
     return this.httpClient.get<TaskElement[]>("http://localhost:3000/tasks");
+  }
 
+  getProgress(): Observable<ProgressElement> {
+    return this.httpClient.get<ProgressElement>("http://localhost:3000/progress")
   }
 
   addTask(newTask: TaskElement) {
@@ -29,7 +37,6 @@ export class TaskService {
     });
   }
 
-  //TODO: Błąd z usuwaniem, po kliknięciu pokazuje 1 el wiecej ale usuwa
   deleteTask(task: TaskElement) {
     const taskId = task.id;
     return this.httpClient.delete(`http://localhost:3000/deleteTask/${taskId}`)
@@ -42,10 +49,10 @@ export class TaskService {
     })
   }
 
-  taskEdit(task: TaskElement, title: string ) {
+  taskEdit(task: TaskElement) {
     return this.httpClient.patch('http://localhost:3000/editTask', {
       id: task.id,
-      title: title
+      title: task.title
     }
     )
   }

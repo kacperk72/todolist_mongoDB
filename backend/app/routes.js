@@ -13,6 +13,29 @@ app.get("/tasks", async (req, res) => {
   })
 });
 
+app.get("/progress", async (req, res) => {
+  let progress = 0;
+  let amountOfTasks = 0;
+  tasks.find().toArray((err, items) => { if (err) {
+        console.error(err)
+        res.status(500).json({ err: err })
+        return
+    }
+    items.forEach(element => {
+      amountOfTasks++;
+        if(element.status){
+            progress++; 
+        }   
+    });
+
+    const data = {
+      amountOfTasks,
+      progress
+    }
+    res.status(200).json(data)
+  })
+})
+
 app.get('*', async (req, res) => {
   res.send('Nie znaleziono');
 })

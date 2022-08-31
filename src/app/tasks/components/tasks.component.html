@@ -12,11 +12,11 @@
               {{task.title}}  
               <div id="options">
                 <mat-checkbox class="example-margin" checkbox style="margin-left:10px; margin-right: 10px;" (change)="checkboxChange($event, task)" id={{task.id}} [checked]="task.status"></mat-checkbox>
-                <button matSuffix mat-icon-button aria-label="Clear" id={{task.id}} (click)="deleteTask(task, $event)">
-                  <mat-icon id={{task.id}}>delete</mat-icon>
+                <button matSuffix mat-icon-button aria-label="Clear" [id]="task.id" (click)="deleteTask(task)">
+                  <mat-icon [id]="task.id">delete</mat-icon>
                 </button>
-                <button matSuffix mat-icon-button aria-label="Clear" id={{task.id}} (click)="editTask(task)">
-                  <mat-icon id={{task.id}}>edit</mat-icon>
+                <button matSuffix mat-icon-button aria-label="Clear" [id]="task.id" (click)="editTask(task)">
+                  <mat-icon [id]="task.id">edit</mat-icon>
                 </button>
               </div>
           </mat-list-item>
@@ -30,7 +30,7 @@
       <div class="footer">
         <p id="postep">
           <!-- Postęp: {{tasks.selectedOptions.selected.length}} / {{listOfTasks.length}} -->
-          Postęp: {{progress}} / {{listOfTasks.length}}
+          Postęp: {{progress$ | async}} / {{amountOfTasks$ | async}}
         </p>
       </div>
         <form [hidden]="isHiddenAddForm" (ngSubmit)="addTask($event)">
@@ -46,7 +46,7 @@
         <form [hidden]="isHiddenEditForm" (ngSubmit)="saveEditedTask($event)">
           <mat-form-field class="form-field" appearance="fill">
             <mat-label>Edytuj zadnie</mat-label>
-            <input matInput name="task" value="{{taskEdit.title}}">
+            <input matInput name="task" [value]="taskEdit.title">
             <button matSuffix mat-icon-button aria-label="Clear">
               <mat-icon>done</mat-icon>
             </button>
